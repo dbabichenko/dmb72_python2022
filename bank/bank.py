@@ -1,4 +1,6 @@
 import uuid
+import pymysql
+import json
 
 '''
 Banking application class list:
@@ -8,11 +10,70 @@ Banking application class list:
 
 '''
 
+class Bank:
+    def __init__(self):
+        self.__customers = []
+        self.__accounts = []
+        self.__populate_customers()
+
+    def __populate_customers(self):
+        try:
+            config = Config()
+            con = config.db_conn
+            with con.cursor() as cur:
+                qry = "SELECT * FROM user;"
+                cur.execute(qry)
+                rows = cur.fetchall()
+                for row in rows:
+                    user = User(row["user_id"], row["first_name"], row["last_name"])
+                    self.__customers.append(user)
+        finally:
+            con.close()
+
+    def get_customers(self):
+        return self.__customers
+
+class Config:
+    def __init__(self):
+        self.db_conn = pymysql.connect(host='67.205.163.33',
+                             user='bankUser',
+                             password='bankUser123',
+                             db='bank',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 class User:
-    def __init__(self, first_name, last_name):
+    def __init__(self, user_id="", first_name = "", last_name = ""):
         self.__f_name = first_name
         self.__l_name = last_name
-        self.__user_id = uuid.uuid4()
+        if user_id == "":
+            self.__user_id = uuid.uuid4()
+            try: 
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    qry = 'INSERT INTO user (user_id, first_name, last_name)'
+                    qry = qry + 'VALUES(%s, %s, %s)'
+                    print(qry)
+                    cur.execute(qry, (self.__user_id, self.__f_name, self.__l_name)) 
+                    con.commit()
+            finally:
+                con.close()
+        else:
+            self.__user_id = user_id
+            try:
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    qry = "SELECT * FROM user WHERE user_id = '" + user_id + "'"
+                    print(qry)
+                    cur.execute(qry)
+                    rows = cur.fetchall()
+                    for row in rows:
+                        self.__user_id = row["user_id"]
+                        self.__f_name = row["first_name"]
+                        self.__l_name = row["last_name"]
+            finally:
+                con.close()
         self.__accounts = []
 
     def get_first_name(self):
@@ -26,20 +87,69 @@ class User:
 
     def set_first_name(self, first_name):
         self.__f_name = first_name
+        try: 
+            config = Config()
+            con = config.db_conn
+            with con.cursor() as cur:
+                qry = 'UPDATE user SET first_name = %s WHERE user_id = %s;'
+                print(qry)
+                cur.execute(qry, (self.__f_name, self.__user_id)) 
+                con.commit()
+        finally:
+            con.close()
     
     def set_last_name(self, last_name):
         self.__l_name = last_name
+        try: 
+            config = Config()
+            con = config.db_conn
+            with con.cursor() as cur:
+                qry = 'UPDATE user SET last_name = %s WHERE user_id = %s;'
+                print(qry)
+                cur.execute(qry, (self.__l_name, self.__user_id)) 
+                con.commit()
+        finally:
+            con.close()
 
     def add_account(self, account_id):
         self.__accounts.append(account_id)
 
 
 class Account:
-    def __init__(self):
-        self.__account_id = uuid.uuid4()
+    def __init__(self, account_id=""):
         self.__balance = 0
         self.__owners = []
         self.__transactions = []
+
+        if account_id != "":
+            self.__account_id = account_id
+            
+            try:
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    qry = "SELECT * FROM account WHERE account_id = '" + account_id + "'"
+                    print(qry)
+                    cur.execute(qry)
+                    rows = cur.fetchall()
+                    for row in rows:
+                        self.__account_id = row["account_id"]
+                        self.__balance = row["balance"]
+            finally:
+                con.close()
+        else:
+            self.__account_id = uuid.uuid4()
+            try: 
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    qry = 'INSERT INTO account (account_id, balance)'
+                    qry = qry + 'VALUES(%s, 0)'
+                    print(qry)
+                    cur.execute(qry, (self.__account_id)) 
+                    con.commit()
+            finally:
+                con.close()
     
     def get_account_id(self):
         return self.__account_id
@@ -54,28 +164,126 @@ class Account:
         self.__balance += amount
         tr = Transaction(amount, "deposit", self.__account_id)
         self.__transactions.append(tr)
+        self.__update_balance()
 
     def withdraw(self, amount):
         self.__balance -= amount
+        tr = Transaction(amount, "withdrawal", self.__account_id)
+        self.__transactions.append(tr)
+        self.__update_balance()
+
+
+    def __update_balance(self):
+        try: 
+            config = Config()
+            con = config.db_conn
+            with con.cursor() as cur:
+                qry = 'UPDATE account SET balance = %s'
+                print(qry)
+                cur.execute(qry, (self.__balance)) 
+                con.commit()
+        finally:
+            con.close()
+
+    def to_json(self):
+        return json.dumps(self.__dict__)
 
 class Transaction:
-    def __init__(self, amount, tr_type, orig_acct, dest_account=""):
+    def __init__(self, amount = 0, tr_type = "", orig_acct = "", dest_account="", transaction_id=""):
         self.__amount = amount
         self.__tr_type = tr_type
         self.__orig_acct = orig_acct
         self.__dest_account = dest_account
         self.__transaction_id = uuid.uuid4()
 
+        if transaction_id != "":
+            self.__transaction_id = transaction_id
+            
+            try:
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    qry = "SELECT * FROM transaction WHERE transaction_id = '" + transaction_id + "'"
+                    print(qry)
+                    cur.execute(qry)
+                    rows = cur.fetchall()
+                    for row in rows:
+                        self.__transaction_id = row["transaction_id"]
+                        self.__amount = row["amount"]
+                        self.__tr_type = row["transaction_type"]
+                        self.__orig_acct = row["fk_orig_account"]
+                        self.__dest_account = row["fk_dest_account"]
+            finally:
+                con.close()
+        else:
+            self.__account_id = uuid.uuid4()
+            try: 
+                config = Config()
+                con = config.db_conn
+                with con.cursor() as cur:
+                    if self.__dest_account != "":
+                        qry = 'INSERT INTO transaction (transaction_id, transaction_type, amount, fk_orig_account, fk_dest_account)'
+                        qry = qry + 'VALUES(%s, %s, %s, %s, %s)'
+                        print(qry)
+                        cur.execute(qry, (self.__transaction_id, self.__tr_type, self.__amount, self.__orig_acct, self.__dest_account)) 
+                    else:
+                        qry = 'INSERT INTO transaction (transaction_id, transaction_type, amount, fk_orig_account)'
+                        qry = qry + 'VALUES(%s, %s, %s, %s)'
+                        print(qry)
+                        cur.execute(qry, (self.__transaction_id, self.__tr_type, self.__amount, self.__orig_acct)) 
+                    con.commit()
+            finally:
+                con.close()
+
     def get_amount(self):
         return self.__amount
 
+    def to_json(self):
+        return json.dumps(self.__dict__)
+
+
+##t = Transaction(transaction_id = "fd5085f9-cfb0-490a-b7b5-ab4a89adeda7")
+##print(t.to_json())
+
+a = Account("ce4d2071-9934-44fe-a22a-d73feca1e95c")
+a.withdraw(1000)
+a.deposit(100000)
+a.deposit(10)
+a.deposit(1000)
+a.deposit(1500)
+a.withdraw(3000)
+
+print(a.to_json())
+
+'''
+
+
+user = User(user_id = "", first_name = "Dmitriy", last_name = "Babichenko")
+user = User(user_id = "", first_name = "Jane", last_name = "Doe")
+user = User(user_id = "", first_name = "Bob", last_name = "Smith")
+user = User(user_id = "", first_name = "Karen", last_name = "Brown")
+user = User(user_id = "", first_name = "George", last_name = "Stephanopolis")
+
+
+bank = Bank()
+for user in bank.get_customers():
+    print(user.get_last_name())
     
 
-user = User("Dmitriy", "Babichenko")
+#user = User(user_id = "", first_name = "Dmitriy", last_name = "Babichenko")
+user = User(user_id = "49c8c7de-7e4b-4678-9f24-1e92604e7f1f")
 print(user.get_user_id())
+print(user.get_first_name())
+user.set_first_name("Bob")
+print(user.get_first_name())
 
+user.set_last_name("Smith")
+print(user.get_last_name())
+'''
+'''
 account = Account()
 print("Init balance: ", account.get_balance())
 account.add_owner(user.get_user_id())
 account.deposit(1000)
 print("Balance after deposit: ", account.get_balance())
+'''

@@ -24,3 +24,6 @@ try:
             print(row['book_id'], row['first_name'], row['last_name'])
 finally:
     con.close()
+
+
+

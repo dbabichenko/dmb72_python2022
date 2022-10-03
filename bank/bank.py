@@ -35,18 +35,27 @@ class Bank:
 
 class Config:
     def __init__(self):
-        self.db_conn = pymysql.connect(host='67.205.163.33',
-                             user='bankUser',
-                             password='bankUser123',
-                             db='bank',
-                             charset='utf8mb4',
+        con_params = self.__read_config()
+        self.db_conn = pymysql.connect(host=con_params["host"],
+                             user=con_params["user"],
+                             password=con_params["password"],
+                             db=con_params["db"],
+                             charset=con_params["charset"],
                              cursorclass=pymysql.cursors.DictCursor)
+    def __read_config(self):
+        try:
+            f = open("config.txt")
+            data = f.read()
+            return dict(json.loads(data))
+        finally:
+            f.close()
+
 class User:
     def __init__(self, user_id="", first_name = "", last_name = ""):
         self.__f_name = first_name
         self.__l_name = last_name
         if user_id == "":
-            self.__user_id = uuid.uuid4()
+            self.__user_id = str(uuid.uuid4())
             try: 
                 config = Config()
                 con = config.db_conn
@@ -138,7 +147,7 @@ class Account:
             finally:
                 con.close()
         else:
-            self.__account_id = uuid.uuid4()
+            self.__account_id = str(uuid.uuid4())
             try: 
                 config = Config()
                 con = config.db_conn
@@ -186,7 +195,15 @@ class Account:
             con.close()
 
     def to_json(self):
-        return json.dumps(self.__dict__)
+        fields_data = {
+            "id" : self.__account_id,
+            "balance" : self.__balance,
+            "transactions" : []
+        }
+        for t in self.__transactions:
+            fields_data["transactions"].append(t.__dict__)
+
+        return json.dumps(fields_data)
 
 class Transaction:
     def __init__(self, amount = 0, tr_type = "", orig_acct = "", dest_account="", transaction_id=""):
@@ -194,7 +211,7 @@ class Transaction:
         self.__tr_type = tr_type
         self.__orig_acct = orig_acct
         self.__dest_account = dest_account
-        self.__transaction_id = uuid.uuid4()
+        self.__transaction_id = str(uuid.uuid4())
 
         if transaction_id != "":
             self.__transaction_id = transaction_id
@@ -216,7 +233,7 @@ class Transaction:
             finally:
                 con.close()
         else:
-            self.__account_id = uuid.uuid4()
+            self.__account_id = str(uuid.uuid4())
             try: 
                 config = Config()
                 con = config.db_conn

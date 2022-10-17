@@ -11,3 +11,7 @@ class Rectangle:
 
     def set_height(self, height):
         self.height = height
+
+
+r = Rectangle(10, 20)
+print(r.get_area());

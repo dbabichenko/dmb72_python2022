@@ -1,0 +1,9 @@
+digraph "classes" {
+charset="utf-8"
+rankdir=BT
+"0" [label="{Account|\l|add_owner(user_id)\ldeposit(amount)\lget_account_id()\lget_balance()\lto_json()\lwithdraw(amount)\l}", shape="record"];
+"1" [label="{Bank|\l|get_customers()\l}", shape="record"];
+"2" [label="{Config|db_conn : Connection\l|}", shape="record"];
+"3" [label="{Transaction|\l|get_amount()\lto_json()\l}", shape="record"];
+"4" [label="{User|\l|add_account(account_id)\lget_first_name()\lget_last_name()\lget_user_id()\lset_first_name(first_name)\lset_last_name(last_name)\l}", shape="record"];
+}

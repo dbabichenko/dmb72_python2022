@@ -14,6 +14,9 @@ class Rectangle:
  
     def set_height(self, height):
         self.height = height
+
+    def get_perimeter(self):
+        return 2 * (self.width + self.height)
  
 # The test based on unittest module
 class TestGetAreaRectangle(unittest.TestCase):
@@ -25,6 +28,10 @@ class TestGetAreaRectangle(unittest.TestCase):
         """expect -1 as output to denote error when looking at negative area"""
         rectangle = Rectangle(-1, 2)
         self.assertEqual(rectangle.get_area(), -1, "incorrect negative output")
+
+    def test_perimiter(self):
+        rectangle = Rectangle(2, 3)
+        self.assertEqual(rectangle.get_perimeter(), 10, "incorrect perimeter")
  
 # run the test
 unittest.main()

@@ -1,23 +1,23 @@
-import string;
+import string
 
-shift = 3
+SHIFT = 3
 choice = input("would you like to encode or decode? ")
 word = input("Please enter text: ")
-letters = string.ascii_letters + string.punctuation + string.digits
+LETTERS = string.ascii_letters + string.punctuation + string.digits
 encoded = ''
 if choice == "encode":
     for letter in word:
         if letter == ' ':
             encoded = encoded + ' '
         else:
-            x = letters.index(letter) + shift
-            encoded = encoded + letters[x]
+            x = LETTERS.index(letter) + SHIFT
+            encoded = encoded + LETTERS[x]
 if choice == "decode":
     for letter in word:
         if letter == ' ':
             encoded = encoded + ' '
         else:
-            x = letters.index(letter) - shift
-            encoded = encoded + letters[x]
+            x = LETTERS.index(letter) - SHIFT
+            encoded = encoded + LETTERS[x]
 
 print(encoded)

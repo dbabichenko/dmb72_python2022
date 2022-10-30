@@ -1,10 +1,12 @@
 def binarySearch(array, x, low, high):
-
+    array = sorted(array)
+    
     # Repeat until the pointers low and high meet each other
     while low <= high:
 
-        mid = low + (high - low)//2
-
+        mid = low + (high - low) // 2
+        print(mid)
+        
         if array[mid] == x:
             return mid
 

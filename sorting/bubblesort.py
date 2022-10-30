@@ -15,7 +15,7 @@ def bubbleSort(array):
         temp = array[j]
         array[j] = array[j+1]
         array[j+1] = temp
-
+    print(array)
 
 data = [-2, 45, 0, 11, -9]
 

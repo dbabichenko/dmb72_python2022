@@ -12,6 +12,7 @@ def selectionSort(array, size):
          
         # put min at the correct position
         (array[step], array[min_idx]) = (array[min_idx], array[step])
+        print(array)
 
 
 data = [-2, 45, 0, 11, -9]

@@ -12,7 +12,7 @@ def insertionSort(array):
         
         # Place key at after the element just smaller than it.
         array[j + 1] = key
-
+        print(array)
 
 data = [9, 5, 1, 4, 3]
 print(data)

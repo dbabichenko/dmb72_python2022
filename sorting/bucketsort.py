@@ -18,6 +18,7 @@ def bucketSort(array):
     for i in range(len(array)):
         buckets[i] = sorted(buckets[i])
  
+    print(buckets)
  
     # Flattening the Array
     result = []

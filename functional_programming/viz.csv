@@ -1,0 +1,19 @@
+Source,Target,Weight
+Robert, Patricia,1
+John, Jennifer,1
+Michael, Linda,4
+David, Elizabeth,5
+William, Barbara,2
+Richard, Susan,1
+Joseph, Jessica,2
+Thomas, Sarah,3
+Charles, Karen,1
+Robert, Jennifer,2
+Robert,David,1
+Robert, Susan,3
+Thomas, Jessica,1
+Thomas, Susan,2
+Thomas,Charles,2
+ Elizabeth, Susan,1
+ Elizabeth,Michael,1
+ Elizabeth,Thomas,1
